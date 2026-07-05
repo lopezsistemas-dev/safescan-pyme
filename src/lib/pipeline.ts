@@ -8,6 +8,7 @@ import {
   containFile,
   containUrl,
   emptyContainment,
+  maskPiiInText,
   readQuarantinedFile,
   type ContainmentResult,
 } from "@/lib/containment";
@@ -265,7 +266,9 @@ export async function runAnalysisPipeline(analysisId: string): Promise<void> {
     const reportInput: ReportInput = {
       inputType,
       originalName: analysis.originalName,
-      inputValue: inputType === "FILE" ? null : analysis.inputValue,
+      // El texto pegado por el usuario (correo/URL) se enmascara antes de
+      // llegar a la capa de IA: los datos personales nunca viajan en claro
+      inputValue: inputType === "FILE" ? null : maskPiiInText(analysis.inputValue ?? ""),
       sha256: analysis.sha256,
       realTypeLabel: containment.fileType?.realTypeLabel ?? analysis.realType,
       fileSize: analysis.fileSize,

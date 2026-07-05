@@ -277,6 +277,32 @@ export function extractIndicatorsFromText(
   };
 }
 
+/**
+ * Enmascara los datos personales presentes en un texto libre (IBAN, DNI/NIE,
+ * emails y teléfonos). Se aplica a todo texto pegado por el usuario antes de
+ * enviarlo a la capa de IA: la minimización de datos no es una promesa,
+ * la impone el código.
+ */
+export function maskPiiInText(text: string): string {
+  let out = text;
+  // IBAN primero (sus dígitos podrían confundirse con teléfonos)
+  out = out.replace(
+    /\b[A-Z]{2}\d{2}(?:[\s-]?[A-Z0-9]{4}){3,7}(?:[\s-]?[A-Z0-9]{1,4})?\b/g,
+    (m) => {
+      const compact = m.replace(/[\s-]/g, "");
+      return compact.length >= 15 && compact.length <= 34 ? maskIban(m) : m;
+    }
+  );
+  out = out.replace(/\b(?:\d{8}[A-Z]|[XYZ]\d{7}[A-Z])\b/gi, (m) =>
+    isValidDniNie(m) ? maskDni(m) : m
+  );
+  out = out.replace(/\b[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}\b/gi, (m) => maskEmail(m));
+  out = out.replace(/(?:(?:\+|00)34[\s.-]?)?\b[679]\d{2}[\s.-]?\d{3}[\s.-]?\d{3}\b/g, (m) =>
+    maskPhone(m)
+  );
+  return out;
+}
+
 /** Extracción vacía (para archivos de los que no se puede leer texto). */
 export function emptyExtraction(): IndicatorExtraction {
   return {

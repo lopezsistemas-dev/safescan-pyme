@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { evaluatePolicy } from "./engine";
 import { containFile, containUrl, emptyContainment } from "@/lib/containment";
 import { getDoubleExtension } from "@/lib/containment/filetype";
-import { isValidDniNie, maskDni, maskIban } from "@/lib/containment/indicators";
+import { isValidDniNie, maskDni, maskIban, maskPiiInText } from "@/lib/containment/indicators";
 import { decideVerdict } from "@/lib/pipeline";
 import { DEFAULT_POLICY, type TenantPolicy } from "@/lib/tenant";
 import type { ThreatIntelligenceResult } from "@/lib/threat-intelligence";
@@ -214,5 +214,16 @@ describe("Utilidades de contención", () => {
   it("enmascara datos personales", () => {
     expect(maskDni("12345678Z")).toBe("12*****Z");
     expect(maskIban("ES9121000418450200051332")).toBe("ES91 **** **** 1332");
+  });
+
+  it("enmascara la PII de un texto libre antes de enviarlo a la IA", () => {
+    const masked = maskPiiInText(
+      "Cliente Ana (ana.perez@mail.com, 612345678), DNI 12345678Z, IBAN ES91 2100 0418 4502 0005 1332"
+    );
+    expect(masked).not.toContain("ana.perez@mail.com");
+    expect(masked).not.toContain("612345678");
+    expect(masked).not.toContain("12345678Z");
+    expect(masked).not.toContain("0005 1332");
+    expect(masked).toContain("@mail.com"); // el dominio se conserva como señal
   });
 });
