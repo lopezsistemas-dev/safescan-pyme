@@ -13,6 +13,13 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { Card } from "./ui";
+import {
+  DEMO_FILES_LEFT,
+  DEMO_FILES_RIGHT,
+  DEMO_FILE_MIME,
+  DemoFilesColumn,
+  DemoFilesRow,
+} from "./demo-files-tray";
 
 type Tab = "chat" | "url" | "email";
 
@@ -43,6 +50,7 @@ export function AgentChat({ tenantName, userName }: { tenantName: string; userNa
   const [emailValue, setEmailValue] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -109,6 +117,34 @@ export function AgentChat({ tenantName, userName }: { tenantName: string; userNa
     );
   }
 
+  /** Analiza uno de los archivos de ejemplo de la bandeja (demo). */
+  async function handleDemoFile(name: string) {
+    if (busy) return;
+    setError(null);
+    try {
+      const res = await fetch(`/demo/${encodeURIComponent(name)}`);
+      if (!res.ok) throw new Error("No se pudo cargar el archivo de ejemplo.");
+      const blob = await res.blob();
+      onFileSelected(new File([blob], name, { type: blob.type || "application/octet-stream" }));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error inesperado.");
+    }
+  }
+
+  function onDrop(e: React.DragEvent<HTMLDivElement>) {
+    e.preventDefault();
+    setDragOver(false);
+    if (busy) return;
+    const demoName = e.dataTransfer.getData(DEMO_FILE_MIME);
+    if (demoName) {
+      void handleDemoFile(demoName);
+      return;
+    }
+    // También se aceptan archivos reales arrastrados desde el escritorio
+    const file = e.dataTransfer.files?.[0];
+    if (file) onFileSelected(file);
+  }
+
   function onSubmitUrl() {
     const url = urlValue.trim();
     if (!url || busy) return;
@@ -140,17 +176,44 @@ export function AgentChat({ tenantName, userName }: { tenantName: string; userNa
   }
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto max-w-6xl">
       <div className="mb-4 text-center">
         <h1 className="text-2xl font-bold text-slate-900">
           ¿Qué has recibido?
         </h1>
         <p className="mt-1 text-sm text-slate-500">
           Pregunta antes de abrir. El análisis se hace en el entorno privado de {tenantName}.
+          <span className="hidden lg:inline"> Arrastra un archivo de ejemplo al chat, o sube el tuyo.</span>
         </p>
       </div>
 
-      <Card className="flex h-[calc(100vh-16rem)] min-h-[480px] flex-col overflow-hidden">
+      <DemoFilesRow onPick={handleDemoFile} disabled={busy !== null} />
+
+      <div className="lg:grid lg:grid-cols-[176px_minmax(0,1fr)_176px] lg:gap-4">
+        <DemoFilesColumn files={DEMO_FILES_LEFT} onPick={handleDemoFile} disabled={busy !== null} />
+
+        <div
+          className="relative mx-auto w-full max-w-3xl"
+          onDragOver={(e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = "copy";
+            setDragOver(true);
+          }}
+          onDragLeave={(e) => {
+            if (!e.currentTarget.contains(e.relatedTarget as Node)) setDragOver(false);
+          }}
+          onDrop={onDrop}
+        >
+          {dragOver ? (
+            <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-2xl border-2 border-dashed border-brand-400 bg-brand-50/85">
+              <p className="flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-brand-700 shadow-md">
+                <ShieldCheck className="h-4.5 w-4.5" />
+                Suelta el archivo: lo analizaré en el entorno seguro
+              </p>
+            </div>
+          ) : null}
+
+          <Card className="flex h-[calc(100vh-16rem)] min-h-[480px] flex-col overflow-hidden">
         {/* Hilo de mensajes */}
         <div ref={scrollRef} className="chat-scroll flex-1 space-y-4 overflow-y-auto p-5">
           {messages.map((message, i) =>
@@ -304,11 +367,16 @@ export function AgentChat({ tenantName, userName }: { tenantName: string; userNa
             </div>
           ) : null}
         </div>
-      </Card>
+          </Card>
+        </div>
+
+        <DemoFilesColumn files={DEMO_FILES_RIGHT} onPick={handleDemoFile} disabled={busy !== null} />
+      </div>
 
       <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-xs text-slate-400">
         <Bot className="h-3.5 w-3.5" />
         El agente nunca recibe el contenido de tus archivos: solo metadatos, puntuaciones y señales.
+        Los archivos de ejemplo son inofensivos y contienen datos ficticios.
       </p>
     </div>
   );
