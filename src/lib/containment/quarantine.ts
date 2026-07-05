@@ -1,62 +1,54 @@
-import { createHash, randomUUID } from "node:crypto";
-import { promises as fs } from "node:fs";
-import path from "node:path";
-import { env } from "@/lib/env";
+import { createHash } from "node:crypto";
+import { prisma } from "@/lib/db";
 
 /**
- * Cuarentena: los archivos se guardan con nombre aleatorio y extensión
- * neutra (.quarantine) para impedir su apertura o ejecución accidental.
- * Nunca se ejecuta ni se abre ningún archivo recibido.
+ * Cuarentena respaldada en base de datos (variante para despliegue
+ * serverless): los archivos se guardan como bytes en la tabla StoredFile,
+ * privada por definición — nunca en disco efímero ni en almacenamiento
+ * público. Nunca se ejecuta ni se abre ningún archivo recibido.
+ *
+ * Las referencias se persisten como "db:<id>" en Analysis.filePath,
+ * manteniendo la misma interfaz que la variante local en disco (rama main).
  */
 
-export function quarantineRoot(): string {
-  return path.resolve(process.cwd(), env.UPLOAD_DIR);
-}
+const DB_PREFIX = "db:";
 
 export function sha256Of(buffer: Buffer): string {
   return createHash("sha256").update(buffer).digest("hex");
 }
 
 export interface QuarantinedFile {
-  /** Ruta relativa al proyecto (se persiste en BD). */
+  /** Referencia persistida en BD ("db:<id>"). */
   relPath: string;
-  absPath: string;
   sha256: string;
   size: number;
 }
 
 export async function saveToQuarantine(tenantId: string, buffer: Buffer): Promise<QuarantinedFile> {
-  const dir = path.join(quarantineRoot(), tenantId);
-  await fs.mkdir(dir, { recursive: true });
-  const filename = `${randomUUID()}.quarantine`;
-  const absPath = path.join(dir, filename);
-  await fs.writeFile(absPath, buffer, { mode: 0o600 });
+  const row = await prisma.storedFile.create({
+    data: { tenantId, scope: "QUARANTINE", data: new Uint8Array(buffer) },
+    select: { id: true },
+  });
   return {
-    relPath: path.relative(process.cwd(), absPath),
-    absPath,
+    relPath: `${DB_PREFIX}${row.id}`,
     sha256: sha256Of(buffer),
     size: buffer.length,
   };
 }
 
 export async function readQuarantinedFile(relPath: string): Promise<Buffer | null> {
-  try {
-    const abs = path.resolve(process.cwd(), relPath);
-    // Nunca leer fuera del directorio de cuarentena
-    if (!abs.startsWith(quarantineRoot() + path.sep)) return null;
-    return await fs.readFile(abs);
-  } catch {
-    return null;
-  }
+  if (!relPath.startsWith(DB_PREFIX)) return null;
+  const row = await prisma.storedFile.findFirst({
+    where: { id: relPath.slice(DB_PREFIX.length), scope: "QUARANTINE" },
+    select: { data: true },
+  });
+  return row ? Buffer.from(row.data) : null;
 }
 
 export async function deleteQuarantinedFile(relPath: string): Promise<boolean> {
-  try {
-    const abs = path.resolve(process.cwd(), relPath);
-    if (!abs.startsWith(quarantineRoot() + path.sep)) return false;
-    await fs.unlink(abs);
-    return true;
-  } catch {
-    return false;
-  }
+  if (!relPath.startsWith(DB_PREFIX)) return false;
+  const result = await prisma.storedFile.deleteMany({
+    where: { id: relPath.slice(DB_PREFIX.length), scope: "QUARANTINE" },
+  });
+  return result.count > 0;
 }

@@ -1,60 +1,15 @@
-import { randomUUID } from "node:crypto";
-import { promises as fs } from "node:fs";
-import path from "node:path";
 import { PDFDocument, degrees } from "pdf-lib";
+import { saveSafeDocsOutput, type SafeDocsOutput } from "./storage";
+
+export { readSafeDocsFile, deleteSafeDocsFile, type SafeDocsOutput } from "./storage";
 
 /**
  * SafeDocs: manipulación privada de documentos cotidianos.
- * Todas las operaciones se ejecutan localmente con pdf-lib: ningún
- * documento sale del servidor del MVP.
+ * Todas las operaciones se ejecutan localmente con pdf-lib y el resultado
+ * se guarda en la base de datos privada: ningún documento sale del entorno.
  *
  * "SafeScan protege documentos sospechosos. SafeDocs protege documentos cotidianos."
  */
-
-export function safeDocsRoot(): string {
-  return path.resolve(process.cwd(), "storage", "safedocs");
-}
-
-export interface SafeDocsOutput {
-  /** Ruta relativa al proyecto (se persiste en BD). */
-  relPath: string;
-  fileName: string;
-  size: number;
-}
-
-async function saveOutput(tenantId: string, bytes: Uint8Array, baseName: string): Promise<SafeDocsOutput> {
-  const dir = path.join(safeDocsRoot(), tenantId);
-  await fs.mkdir(dir, { recursive: true });
-  const fileName = `${baseName}-${randomUUID().slice(0, 8)}.pdf`;
-  const absPath = path.join(dir, fileName);
-  await fs.writeFile(absPath, bytes, { mode: 0o600 });
-  return {
-    relPath: path.relative(process.cwd(), absPath),
-    fileName,
-    size: bytes.length,
-  };
-}
-
-export async function readSafeDocsFile(relPath: string): Promise<Buffer | null> {
-  try {
-    const abs = path.resolve(process.cwd(), relPath);
-    if (!abs.startsWith(safeDocsRoot() + path.sep)) return null;
-    return await fs.readFile(abs);
-  } catch {
-    return null;
-  }
-}
-
-export async function deleteSafeDocsFile(relPath: string): Promise<boolean> {
-  try {
-    const abs = path.resolve(process.cwd(), relPath);
-    if (!abs.startsWith(safeDocsRoot() + path.sep)) return false;
-    await fs.unlink(abs);
-    return true;
-  } catch {
-    return false;
-  }
-}
 
 /** Une varios PDFs en uno, en el orden recibido. */
 export async function mergePdfs(tenantId: string, buffers: Buffer[]): Promise<SafeDocsOutput> {
@@ -65,7 +20,7 @@ export async function mergePdfs(tenantId: string, buffers: Buffer[]): Promise<Sa
     const pages = await merged.copyPages(doc, doc.getPageIndices());
     for (const page of pages) merged.addPage(page);
   }
-  return saveOutput(tenantId, await merged.save(), "unido");
+  return saveSafeDocsOutput(tenantId, await merged.save(), "unido");
 }
 
 /**
@@ -87,7 +42,7 @@ export async function splitPdf(
   setSafeMetadata(out);
   const pages = await out.copyPages(source, indices);
   for (const page of pages) out.addPage(page);
-  return saveOutput(tenantId, await out.save(), "paginas");
+  return saveSafeDocsOutput(tenantId, await out.save(), "paginas");
 }
 
 /** Rota todas las páginas del PDF (90, 180 o 270 grados). */
@@ -101,7 +56,7 @@ export async function rotatePdf(
     const current = page.getRotation().angle;
     page.setRotation(degrees(((current + angle) % 360) as 0 | 90 | 180 | 270));
   }
-  return saveOutput(tenantId, await doc.save(), "rotado");
+  return saveSafeDocsOutput(tenantId, await doc.save(), "rotado");
 }
 
 /**
@@ -112,7 +67,7 @@ export async function rotatePdf(
 export async function cleanPdfMetadata(tenantId: string, buffer: Buffer): Promise<SafeDocsOutput> {
   const doc = await PDFDocument.load(new Uint8Array(buffer), { ignoreEncryption: true });
   setSafeMetadata(doc);
-  return saveOutput(tenantId, await doc.save(), "limpio");
+  return saveSafeDocsOutput(tenantId, await doc.save(), "limpio");
 }
 
 function setSafeMetadata(doc: PDFDocument): void {

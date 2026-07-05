@@ -3,6 +3,9 @@ import { prisma } from "@/lib/db";
 import { jsonError, requireSession } from "@/lib/api-helpers";
 import { runAnalysisPipeline } from "@/lib/pipeline";
 
+// El pipeline mantiene la petición abierta mientras avanza (serverless)
+export const maxDuration = 60;
+
 /**
  * Ejecuta el pipeline de análisis completo sobre un análisis registrado.
  * La petición se mantiene abierta mientras avanza; la UI hace polling en

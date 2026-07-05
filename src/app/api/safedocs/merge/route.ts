@@ -1,6 +1,8 @@
 import { NextRequest } from "next/server";
 import { jsonError, requireSession } from "@/lib/api-helpers";
 import { mergePdfs } from "@/lib/safedocs";
+
+export const maxDuration = 60;
 import { readPdfUploads, recordSafeDocsJob } from "@/lib/safedocs/api";
 
 /** SafeDocs: unir varios PDFs en uno, en local. */

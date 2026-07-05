@@ -22,6 +22,7 @@ function hoursAgo(h: number): Date {
 
 async function main() {
   // Limpieza previa (orden inverso a las FK)
+  await prisma.storedFile.deleteMany();
   await prisma.auditLog.deleteMany();
   await prisma.indicator.deleteMany();
   await prisma.safeDocsJob.deleteMany();

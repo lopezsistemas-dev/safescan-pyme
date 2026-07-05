@@ -1,14 +1,18 @@
-// SafeScan PYME — Esquema de base de datos (SQLite en desarrollo)
-// Los "enums" se modelan como String porque SQLite no soporta enums nativos.
-// Valores válidos documentados en src/lib/constants.ts
+// SafeScan PYME — Esquema de base de datos (rama deploy/vercel: PostgreSQL)
+// Los "enums" se modelan como String para mantener compatibilidad con la
+// rama main (SQLite local). Valores válidos en src/lib/constants.ts
+//
+// DATABASE_URL: conexión pooled (runtime serverless)
+// DIRECT_URL:   conexión directa (migraciones)
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Tenant {
@@ -109,6 +113,18 @@ model AuditLog {
   tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   user     User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
   analysis Analysis? @relation(fields: [analysisId], references: [id], onDelete: SetNull)
+}
+
+// Almacenamiento de archivos en BD (despliegue serverless): la cuarentena y
+// las salidas de SafeDocs viven en la base de datos privada, nunca en
+// almacenamiento público. Referenciados como "db:<id>" en filePath/outputFile.
+model StoredFile {
+  id        String   @id @default(cuid())
+  tenantId  String
+  scope     String // QUARANTINE | SAFEDOCS
+  name      String?
+  data      Bytes
+  createdAt DateTime @default(now())
 }
 
 model SafeDocsJob {

@@ -17,10 +17,10 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     return jsonError(410, "El documento ya no está disponible (eliminado por la política de retención).");
   }
 
-  const buffer = await readSafeDocsFile(job.outputFile);
-  if (!buffer) return jsonError(410, "El documento ya no está disponible.");
+  const stored = await readSafeDocsFile(job.outputFile);
+  if (!stored) return jsonError(410, "El documento ya no está disponible.");
 
-  const fileName = job.outputFile.split("/").pop() ?? "safedocs.pdf";
+  const { buffer, fileName } = stored;
   return new NextResponse(new Uint8Array(buffer), {
     headers: {
       "content-type": "application/pdf",
