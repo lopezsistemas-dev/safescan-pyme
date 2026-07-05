@@ -1,5 +1,26 @@
-import { PDFParse } from "pdf-parse";
 import type { FileKind } from "./filetype";
+
+/**
+ * pdf-parse (basado en pdf.js) referencia globales de navegador como
+ * `DOMMatrix`, ausentes en algunos runtimes serverless. Se aporta un
+ * polyfill mínimo y se importa el módulo de forma perezosa (solo cuando
+ * hay realmente un PDF que analizar), de modo que el resto de tipos —ZIP,
+ * Office, texto— nunca cargan pdf.js.
+ */
+function ensurePdfGlobals(): void {
+  const g = globalThis as Record<string, unknown>;
+  if (typeof g.DOMMatrix === "undefined") {
+    class DOMMatrixPolyfill {
+      a = 1; b = 0; c = 0; d = 1; e = 0; f = 0;
+      constructor(init?: number[]) {
+        if (Array.isArray(init) && init.length >= 6) {
+          [this.a, this.b, this.c, this.d, this.e, this.f] = init;
+        }
+      }
+    }
+    g.DOMMatrix = DOMMatrixPolyfill;
+  }
+}
 
 /**
  * Extracción segura de texto para el análisis de indicadores.
@@ -39,7 +60,9 @@ export async function extractSafeText(
   }
 
   if (kind === "pdf") {
-    let parser: PDFParse | null = null;
+    ensurePdfGlobals();
+    const { PDFParse } = await import("pdf-parse");
+    let parser: InstanceType<typeof PDFParse> | null = null;
     try {
       parser = new PDFParse({ data: new Uint8Array(buffer) });
       const result = await parser.getText();
