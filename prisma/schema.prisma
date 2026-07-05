@@ -1,0 +1,126 @@
+// SafeScan PYME — Esquema de base de datos (SQLite en desarrollo)
+// Los "enums" se modelan como String porque SQLite no soporta enums nativos.
+// Valores válidos documentados en src/lib/constants.ts
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id        String   @id @default(cuid())
+  name      String
+  domain    String   @unique
+  sector    String
+  // Política de la empresa en JSON: umbrales, private scanning preferido,
+  // bloqueo de ejecutables, palabras sensibles adicionales…
+  policy    String   @default("{}")
+  createdAt DateTime @default(now())
+
+  users        User[]
+  analyses     Analysis[]
+  auditLogs    AuditLog[]
+  safeDocsJobs SafeDocsJob[]
+}
+
+model User {
+  id       String @id @default(cuid())
+  tenantId String
+  name     String
+  role     String // EMPLEADO | RESPONSABLE
+  email    String
+
+  tenant       Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  analyses     Analysis[]
+  auditLogs    AuditLog[]
+  safeDocsJobs SafeDocsJob[]
+}
+
+model Analysis {
+  id           String  @id @default(cuid())
+  tenantId     String
+  userId       String
+  inputType    String // FILE | URL | EMAIL_TEXT | SAFEDOCS
+  originalName String?
+  // URL analizada o extracto del correo descrito por el empleado
+  inputValue   String?
+  filePath     String?
+  sha256       String?
+  mimeType     String?
+  // Tipo real detectado por firma binaria (magic bytes)
+  realType     String?
+  fileSize     Int?
+
+  status        String @default("RECIBIDO") // RECIBIDO | ANALIZANDO | COMPLETADO | ERROR
+  progressStage String @default("Recibido en cuarentena")
+  progressPct   Int    @default(0)
+
+  threatScore         Int?
+  sensitivityScore    Int?
+  recommendedFlow     String? // HASH_LOOKUP | URL_LOOKUP | PRIVATE_SCANNING | LOCAL_ONLY | HUMAN_REVIEW | QUARANTINE
+  finalVerdict        String? // ABRIR | ABRIR_CON_PRECAUCION | BLOQUEAR | ESCALAR | CUARENTENA
+  providerUsed        String?
+  privateScanningUsed Boolean @default(false)
+  mockMode            Boolean @default(true)
+
+  employeeReport String?
+  adminReport    String?
+  // Resultado completo del Policy & Privacy Engine (JSON) para trazabilidad
+  policyJson     String?
+  // Resultado completo de la capa de threat intelligence (JSON)
+  tiJson         String?
+
+  quarantined Boolean @default(false)
+  fileDeleted Boolean @default(false)
+  resolved    Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant     Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  indicators Indicator[]
+  auditLogs  AuditLog[]
+}
+
+model Indicator {
+  id         String @id @default(cuid())
+  analysisId String
+  type       String // URL | DOMAIN | EMAIL | HASH | PHONE | IBAN | DNI | KEYWORD
+  value      String
+  risk       String // BAJO | MEDIO | ALTO
+
+  analysis Analysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  tenantId   String
+  userId     String?
+  analysisId String?
+  action     String
+  details    String
+  createdAt  DateTime @default(now())
+
+  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user     User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  analysis Analysis? @relation(fields: [analysisId], references: [id], onDelete: SetNull)
+}
+
+model SafeDocsJob {
+  id         String   @id @default(cuid())
+  tenantId   String
+  userId     String
+  operation  String // UNIR | SEPARAR | ROTAR | LIMPIAR_METADATOS
+  inputFiles String // JSON: nombres de los archivos de entrada
+  outputFile String?
+  status     String   @default("COMPLETADO") // COMPLETADO | ERROR
+  createdAt  DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

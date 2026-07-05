@@ -1,0 +1,7 @@
+Reservas agosto — listado de clientes del hotel (DATOS FICTICIOS)
+cliente;email;telefono;reserva;canal
+Ana Torres;ana.torres@ejemplo.es;612345678;R-1203;booking
+Luis Prado;luis.prado@ejemplo.es;698765432;R-1204;check-in directo
+Eva Salas;eva.salas@ejemplo.es;655443322;R-1205;booking
+Mar Vidal;mar.vidal@ejemplo.es;677889900;R-1206;agencia
+Nota: pago pendiente de confirmar con el banco para la reserva R-1204.
