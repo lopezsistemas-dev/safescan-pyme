@@ -156,6 +156,20 @@ writeFileSync(
   "utf8"
 );
 
+// Caso extra (sensible cotidiano): CSV de nóminas con datos FICTICIOS
+writeFileSync(
+  path.join(OUT, "nominas_enero.csv"),
+  [
+    "Nóminas enero — DATOS FICTICIOS para la demo",
+    "empleado;dni;iban;telefono;nomina",
+    "Laura Gil;12345678Z;ES91 2100 0418 4502 0005 1332;612345678;1.850,00 EUR",
+    "Mario Paz;87654321X;ES76 2077 0024 0031 0257 5766;698765432;1.720,00 EUR",
+    "Sara Rey;11111111H;ES60 0049 1500 0512 3456 7892;655443322;1.910,00 EUR",
+    "Pago por transferencia bancaria a final de mes.",
+  ].join("\n"),
+  "utf8"
+);
+
 const files = [
   // Caso 3 (clínica): PDF con datos sensibles FICTICIOS
   makePdf("Documentación del paciente (FICTICIA)", [
@@ -184,6 +198,23 @@ const files = [
 ];
 
 await Promise.all(files);
+
+// Copia de los archivos usados por la bandeja de la demo web (public/demo/)
+import { copyFileSync } from "node:fs";
+const PUBLIC_DEMO = path.resolve(process.cwd(), "public", "demo");
+mkdirSync(PUBLIC_DEMO, { recursive: true });
+for (const name of [
+  "factura_urgente.zip",
+  "reservas_agosto.xlsm",
+  "documentacion_paciente.pdf",
+  "nominas_enero.csv",
+  "correo_phishing.txt",
+  "acta_reunion.pdf",
+]) {
+  copyFileSync(path.join(OUT, name), path.join(PUBLIC_DEMO, name));
+}
+
 console.log("✅ demo-files/ generado: factura_urgente.zip, reservas_agosto.xlsm,");
 console.log("   documentacion_paciente.pdf, acta_reunion.pdf, presupuesto_marketing.pdf,");
-console.log("   correo_phishing.txt");
+console.log("   correo_phishing.txt, nominas_enero.csv");
+console.log("✅ public/demo/ sincronizado (bandeja de archivos de la demo web)");
