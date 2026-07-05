@@ -112,6 +112,23 @@ export function isValidDniNie(value: string): boolean {
   return false;
 }
 
+/**
+ * Valida un IBAN por su checksum (m\u00f3d-97 = 1, norma ISO 13616), evitando
+ * los falsos positivos de una simple coincidencia de patr\u00f3n.
+ */
+export function isValidIban(value: string): boolean {
+  const v = value.replace(/[\s-]/g, "").toUpperCase();
+  if (!/^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/.test(v)) return false;
+  const rearranged = v.slice(4) + v.slice(0, 4);
+  const numeric = rearranged.replace(/[A-Z]/g, (c) => String(c.charCodeAt(0) - 55));
+  // m\u00f3d-97 por bloques para no desbordar Number
+  let remainder = 0;
+  for (let i = 0; i < numeric.length; i += 7) {
+    remainder = Number(`${remainder}${numeric.slice(i, i + 7)}`) % 97;
+  }
+  return remainder === 1;
+}
+
 function normalize(text: string): string {
   return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 }
@@ -177,7 +194,8 @@ export function extractIndicatorsFromText(
     if (indicators.filter((i) => i.type === "URL").length < MAX_PER_TYPE) {
       indicators.push({
         type: "URL",
-        value: url.slice(0, 200),
+        // La query puede llevar PII embebida (email, DNI…): se enmascara
+        value: maskPiiInText(url.slice(0, 200)),
         risk: risky ? "ALTO" : isHttp ? "MEDIO" : "BAJO",
       });
     }
@@ -213,10 +231,7 @@ export function extractIndicatorsFromText(
   const ibanMatches = Array.from(
     new Set(
       (clipped.match(/\b[A-Z]{2}\d{2}(?:[\s-]?[A-Z0-9]{4}){3,7}(?:[\s-]?[A-Z0-9]{1,4})?\b/g) ?? []).filter(
-        (m) => {
-          const compact = m.replace(/[\s-]/g, "");
-          return compact.length >= 15 && compact.length <= 34;
-        }
+        isValidIban
       )
     )
   );
@@ -288,10 +303,7 @@ export function maskPiiInText(text: string): string {
   // IBAN primero (sus dígitos podrían confundirse con teléfonos)
   out = out.replace(
     /\b[A-Z]{2}\d{2}(?:[\s-]?[A-Z0-9]{4}){3,7}(?:[\s-]?[A-Z0-9]{1,4})?\b/g,
-    (m) => {
-      const compact = m.replace(/[\s-]/g, "");
-      return compact.length >= 15 && compact.length <= 34 ? maskIban(m) : m;
-    }
+    (m) => (isValidIban(m) ? maskIban(m) : m)
   );
   out = out.replace(/\b(?:\d{8}[A-Z]|[XYZ]\d{7}[A-Z])\b/gi, (m) =>
     isValidDniNie(m) ? maskDni(m) : m

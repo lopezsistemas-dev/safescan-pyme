@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import { evaluatePolicy } from "./engine";
 import { containFile, containUrl, emptyContainment } from "@/lib/containment";
 import { getDoubleExtension } from "@/lib/containment/filetype";
-import { isValidDniNie, maskDni, maskIban, maskPiiInText } from "@/lib/containment/indicators";
+import { isValidDniNie, isValidIban, maskDni, maskIban, maskPiiInText } from "@/lib/containment/indicators";
+import { parsePageRanges } from "@/lib/safedocs";
 import { decideVerdict } from "@/lib/pipeline";
 import { DEFAULT_POLICY, type TenantPolicy } from "@/lib/tenant";
 import type { ThreatIntelligenceResult } from "@/lib/threat-intelligence";
@@ -225,5 +226,28 @@ describe("Utilidades de contención", () => {
     expect(masked).not.toContain("12345678Z");
     expect(masked).not.toContain("0005 1332");
     expect(masked).toContain("@mail.com"); // el dominio se conserva como señal
+  });
+
+  it("valida el checksum de un IBAN (mód-97) y descarta falsos positivos", () => {
+    expect(isValidIban("ES9121000418450200051332")).toBe(true);
+    expect(isValidIban("ES91 2100 0418 4502 0005 1332")).toBe(true);
+    expect(isValidIban("ES0021000418450200051332")).toBe(false); // checksum inválido
+    expect(isValidIban("XX1122223333444455556666")).toBe(false); // patrón sin checksum válido
+  });
+
+  it("solo enmascara IBAN válidos, no cadenas parecidas", () => {
+    const masked = maskPiiInText("ref ES0021000418450200051332 y buena ES9121000418450200051332");
+    expect(masked).toContain("ES0021000418450200051332"); // inválido: intacto
+    expect(masked).not.toContain("ES9121000418450200051332"); // válido: enmascarado
+  });
+});
+
+describe("SafeDocs · parsePageRanges", () => {
+  it("acota los rangos al total de páginas sin iterar de más (anti-DoS)", () => {
+    expect(parsePageRanges("1-3,5", 10)).toEqual([0, 1, 2, 4]);
+    // Un rango enorme se acota al total: no bloquea el event loop
+    expect(parsePageRanges("1-999999999", 5)).toEqual([0, 1, 2, 3, 4]);
+    expect(parsePageRanges("8-20", 5)).toEqual([]); // fuera de rango
+    expect(parsePageRanges("", 5)).toEqual([]);
   });
 });

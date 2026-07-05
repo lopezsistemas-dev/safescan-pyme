@@ -37,12 +37,24 @@ export async function readPdfUploads(
     return { files: [], error: jsonError(400, `Máximo ${max} PDFs por operación.`) };
   }
 
+  // Tope agregado de memoria: la suma de todos los PDF no puede exceder 3×
+  // el límite por archivo, aunque cada uno individualmente lo respete.
+  const aggregateLimit = env.maxUploadBytes * 3;
+  let aggregate = 0;
+
   const files: UploadedPdf[] = [];
   for (const file of entries) {
     if (file.size > env.maxUploadBytes) {
       return {
         files: [],
         error: jsonError(413, `"${file.name}" supera el límite de ${env.MAX_UPLOAD_MB} MB.`),
+      };
+    }
+    aggregate += file.size;
+    if (aggregate > aggregateLimit) {
+      return {
+        files: [],
+        error: jsonError(413, "El tamaño total de los documentos supera el límite permitido."),
       };
     }
     const buffer = Buffer.from(await file.arrayBuffer());

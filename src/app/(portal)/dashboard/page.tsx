@@ -12,6 +12,7 @@ import {
   type SafeDocsOperation,
   type Verdict,
 } from "@/lib/constants";
+import { maskPiiInText } from "@/lib/containment/indicators";
 import { Badge, Card, formatDate } from "@/components/ui";
 import { VerdictPill } from "@/components/analysis-ui";
 import { AnalysisActions, SweepButton } from "@/components/dashboard-actions";
@@ -108,7 +109,7 @@ export default async function DashboardPage() {
                 <tr key={analysis.id} className="border-b border-slate-50 align-top hover:bg-slate-50/60">
                   <td className="max-w-56 px-5 py-3">
                     <p className="truncate font-medium text-slate-800">
-                      {analysis.originalName ?? analysis.inputValue ?? "—"}
+                      {analysis.originalName ?? (analysis.inputValue ? maskPiiInText(analysis.inputValue) : "—")}
                     </p>
                     <p className="mt-0.5 flex flex-wrap items-center gap-1 text-xs text-slate-400">
                       {INPUT_TYPE_LABELS[analysis.inputType as InputType] ?? analysis.inputType}

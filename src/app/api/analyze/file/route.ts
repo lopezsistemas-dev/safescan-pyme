@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { env } from "@/lib/env";
 import { audit } from "@/lib/audit";
-import { jsonError, requireSession } from "@/lib/api-helpers";
+import { jsonError, rejectOversizedBody, requireSession } from "@/lib/api-helpers";
 import { getExtension } from "@/lib/containment/filetype";
 import { saveToQuarantine } from "@/lib/containment/quarantine";
 
@@ -13,6 +13,9 @@ import { saveToQuarantine } from "@/lib/containment/quarantine";
 export async function POST(req: NextRequest) {
   const { ctx, error } = await requireSession();
   if (error) return error;
+
+  const oversized = rejectOversizedBody(req);
+  if (oversized) return oversized;
 
   const formData = await req.formData().catch(() => null);
   if (!formData) return jsonError(400, "No se pudo leer el formulario de subida.");

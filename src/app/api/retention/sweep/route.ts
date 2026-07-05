@@ -4,9 +4,10 @@ import { sweepExpiredFiles } from "@/lib/retention";
 
 /** Limpieza manual de archivos expirados (botón del dashboard). */
 export async function POST() {
-  const { error } = await requireSession();
+  const { ctx, error } = await requireSession();
   if (error) return error;
 
-  const result = await sweepExpiredFiles();
+  // El barrido manual solo afecta a los datos del tenant de la sesión
+  const result = await sweepExpiredFiles(ctx.tenant.id);
   return NextResponse.json(result);
 }

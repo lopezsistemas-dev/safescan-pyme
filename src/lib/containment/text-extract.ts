@@ -33,6 +33,17 @@ function ensurePdfGlobals(): void {
  */
 
 const MAX_TEXT_CHARS = 300_000;
+const PDF_PARSE_TIMEOUT_MS = 15_000;
+
+/** Impone un límite de tiempo a una promesa (parseo de PDF que pueda colgarse). */
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error(`Timeout: ${label} superó ${ms} ms`)), ms)
+    ),
+  ]);
+}
 
 export interface PdfMeta {
   title?: string;
@@ -65,12 +76,13 @@ export async function extractSafeText(
     let parser: InstanceType<typeof PDFParse> | null = null;
     try {
       parser = new PDFParse({ data: new Uint8Array(buffer) });
-      const result = await parser.getText();
+      // Timeout duro: un PDF malformado no puede colgar el proceso
+      const result = await withTimeout(parser.getText(), PDF_PARSE_TIMEOUT_MS, "getText");
       const text = (result.text ?? "").slice(0, MAX_TEXT_CHARS);
 
       let pdfMeta: PdfMeta | undefined;
       try {
-        const info = await parser.getInfo();
+        const info = await withTimeout(parser.getInfo(), PDF_PARSE_TIMEOUT_MS, "getInfo");
         const raw = (info as { info?: Record<string, unknown> })?.info ?? {};
         pdfMeta = {
           title: typeof raw.Title === "string" ? raw.Title : undefined,
