@@ -4,6 +4,8 @@
 
 > Pregunta antes de abrir.
 
+**Demo pública en vivo:** https://safescan-pyme.vercel.app · **Repositorio:** https://github.com/lopezsistemas-dev/safescan-pyme
+
 SafeScan PYME permite que cualquier empleado sin conocimientos técnicos pregunte *"¿puedo abrir esto?"* — un archivo, una URL o un correo sospechoso — y reciba una respuesta clara, segura y comprensible: **Abrir, Abrir con precaución, Bloquear, Escalar o Mantener en cuarentena**.
 
 La idea central del producto:
