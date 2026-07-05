@@ -27,7 +27,12 @@ export async function POST(req: NextRequest) {
     tenant: user.tenant.name,
     user: user.name,
   });
-  const cookieOptions = { httpOnly: true, sameSite: "lax" as const, path: "/" };
+  const cookieOptions = {
+    httpOnly: true,
+    sameSite: "lax" as const,
+    path: "/",
+    secure: process.env.NODE_ENV === "production",
+  };
   res.cookies.set(TENANT_COOKIE, tenantId, cookieOptions);
   res.cookies.set(USER_COOKIE, userId, cookieOptions);
 

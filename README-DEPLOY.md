@@ -4,7 +4,7 @@ Esta rama adapta el MVP a Vercel (serverless). Diferencias con `main`:
 
 - **PostgreSQL** en lugar de SQLite (`main` sigue siendo la referencia para ejecución local).
 - **Cuarentena y salidas de SafeDocs en la base de datos** (tabla privada `StoredFile`) en lugar del disco: en serverless no hay disco persistente, y así ningún archivo analizado acaba en almacenamiento público.
-- `vercel.json` ejecuta migraciones y seed en cada build (la demo se reinicia a su estado de fábrica en cada deploy).
+- `vercel.json` ejecuta las migraciones (`prisma migrate deploy`) en cada build. El seed de la demo se ejecuta **una sola vez** al preparar la base de datos (`prisma db seed`); NO se repite en cada deploy, para no borrar los análisis creados en vivo durante la evaluación. Los datos de fábrica persisten entre despliegues.
 - `maxDuration = 60` en las rutas largas (pipeline y SafeDocs).
 
 ## Pasos en Vercel (una vez con cuenta)

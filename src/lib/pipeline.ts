@@ -198,9 +198,7 @@ export async function runAnalysisPipeline(analysisId: string): Promise<void> {
         sensitivityScore: policyResult.sensitivityScore,
         recommendedFlow: policyResult.recommendedFlow,
         policyJson: JSON.stringify(policyResult),
-        quarantined:
-          inputType === "FILE" &&
-          ["QUARANTINE", "HUMAN_REVIEW", "PRIVATE_SCANNING"].includes(policyResult.recommendedFlow),
+        // El flag `quarantined` se fija en la etapa final, ya con el veredicto
       },
     });
 
@@ -304,6 +302,18 @@ export async function runAnalysisPipeline(analysisId: string): Promise<void> {
         employeeReport: reports.employeeReport,
         adminReport: reports.adminReport,
         tiJson: JSON.stringify(ti),
+        // El estado de cuarentena refleja el veredicto real (no solo el flujo):
+        // un archivo bloqueado/escalado/retenido queda marcado como contenido.
+        quarantined:
+          inputType === "FILE" &&
+          (["BLOQUEAR", "CUARENTENA", "ESCALAR"].includes(verdict) ||
+            ["QUARANTINE", "HUMAN_REVIEW", "PRIVATE_SCANNING"].includes(flow)),
+        // Privacidad por diseño: el texto libre (correo/URL) se guarda ya
+        // enmascarado una vez completado el análisis. El crudo solo existe en
+        // memoria durante el pipeline; nunca reposa en la base de datos.
+        ...(inputType !== "FILE" && analysis.inputValue
+          ? { inputValue: maskPiiInText(analysis.inputValue) }
+          : {}),
       },
     });
 

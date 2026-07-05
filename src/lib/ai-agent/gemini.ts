@@ -1,4 +1,5 @@
 import { env } from "@/lib/env";
+import { maskPiiInText } from "@/lib/containment/indicators";
 import { MockAgentProvider } from "./mock";
 import type {
   AgentChatContext,
@@ -92,9 +93,11 @@ export class GeminiProvider implements AgentProvider {
           ],
         },
         { role: "model", parts: [{ text: "Entendido. Soy el agente de seguridad de la empresa." }] },
+        // Minimización de datos: el texto del usuario se enmascara (PII) antes
+        // de salir hacia el modelo, igual que en la generación de informes.
         ...turns.slice(-12).map((t) => ({
           role: t.role === "user" ? "user" : "model",
-          parts: [{ text: t.content }],
+          parts: [{ text: t.role === "user" ? maskPiiInText(t.content) : t.content }],
         })),
       ];
       return await this.generate(contents, false);

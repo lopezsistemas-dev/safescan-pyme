@@ -90,9 +90,9 @@ export function SweepButton() {
     try {
       const res = await fetch("/api/retention/sweep", { method: "POST" });
       const data = (await res.json().catch(() => null)) as
-        | { quarantine?: number; safedocs?: number }
+        | { quarantine?: number; safedocs?: number; inputs?: number }
         | null;
-      const total = (data?.quarantine ?? 0) + (data?.safedocs ?? 0);
+      const total = (data?.quarantine ?? 0) + (data?.safedocs ?? 0) + (data?.inputs ?? 0);
       setMessage(
         total > 0
           ? `${total} archivo(s) expirados eliminados.`

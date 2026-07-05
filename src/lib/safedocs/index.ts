@@ -90,11 +90,11 @@ export function parsePageRanges(ranges: string, totalPages: number): number[] {
     if (!piece) continue;
     const m = /^(\d+)(?:\s*-\s*(\d+))?$/.exec(piece);
     if (!m) continue;
-    const start = parseInt(m[1], 10);
-    const end = m[2] ? parseInt(m[2], 10) : start;
-    for (let p = start; p <= end; p++) {
-      if (p >= 1 && p <= totalPages) indices.add(p - 1);
-    }
+    // Se acota al rango válido ANTES de iterar: evita bloquear el event loop
+    // con un rango enorme (p. ej. "1-999999999").
+    const start = Math.max(1, parseInt(m[1], 10));
+    const end = Math.min(totalPages, m[2] ? parseInt(m[2], 10) : start);
+    for (let p = start; p <= end; p++) indices.add(p - 1);
   }
   return Array.from(indices).sort((a, b) => a - b);
 }

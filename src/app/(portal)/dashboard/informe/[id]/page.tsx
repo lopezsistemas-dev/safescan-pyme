@@ -11,6 +11,7 @@ import {
   type InputType,
   type Verdict,
 } from "@/lib/constants";
+import { maskPiiInText } from "@/lib/containment/indicators";
 import { Card, ReportMarkdown, RiskBadge, ScoreBar, formatBytes, formatDate } from "@/components/ui";
 import { AnalysisBadges, VerdictBanner } from "@/components/analysis-ui";
 
@@ -51,7 +52,7 @@ export default async function ReportDetailPage({ params }: { params: Promise<{ i
       <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-xl font-bold break-all text-slate-900">
-            {analysis.originalName ?? analysis.inputValue ?? "Análisis"}
+            {analysis.originalName ?? (analysis.inputValue ? maskPiiInText(analysis.inputValue) : "Análisis")}
           </h1>
           <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-500">
             <span>{INPUT_TYPE_LABELS[analysis.inputType as InputType] ?? analysis.inputType}</span>
