@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { jsonError, requireSession } from "@/lib/api-helpers";
+import { maskPiiInText } from "@/lib/containment/indicators";
 
 /** Estado y resultado de un análisis (la UI hace polling durante el pipeline). */
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -14,5 +15,13 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   });
   if (!analysis) return jsonError(404, "Análisis no encontrado.");
 
-  return NextResponse.json({ analysis });
+  // Privacidad: el texto libre (correo/URL) se persiste enmascarado al COMPLETAR,
+  // pero durante el pipeline sigue en claro en BD. Se enmascara también aquí para
+  // que la vista en vivo nunca reciba PII sin enmascarar.
+  const safe =
+    analysis.inputType !== "FILE" && analysis.inputValue
+      ? { ...analysis, inputValue: maskPiiInText(analysis.inputValue) }
+      : analysis;
+
+  return NextResponse.json({ analysis: safe });
 }

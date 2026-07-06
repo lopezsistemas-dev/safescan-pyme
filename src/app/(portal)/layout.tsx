@@ -18,9 +18,9 @@ export default async function PortalLayout({ children }: { children: React.React
       <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur">
         <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-3 px-4">
           <div className="flex items-center gap-3">
-            <Link href="/agente" className="flex items-center gap-2">
+            <Link href="/agente" className="flex items-center gap-2" aria-label="SafeScan PYME — ir al agente">
               <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-600 text-white">
-                <ShieldCheck className="h-5 w-5" />
+                <ShieldCheck className="h-5 w-5" aria-hidden="true" />
               </span>
               <span className="hidden text-base font-bold text-slate-900 md:inline">
                 SafeScan <span className="text-brand-600">PYME</span>

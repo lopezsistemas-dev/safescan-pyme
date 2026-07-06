@@ -63,6 +63,14 @@ export const HEALTH_KEYWORDS = [
   "diagnostico", "tratamiento", "receta", "informe médico", "informe medico",
 ];
 
+// Patrones de PII como factorías (regex nueva por uso: /g mantiene estado).
+// Teléfono ES: prefijo +34/0034 opcional (también pegado), sin cortar números
+// más largos. IBAN: no arranca dentro de un token alfanumérico previo.
+export const PHONE_REGEX = () =>
+  /(?<![\d+])(?:(?:\+|00)34[\s.-]?)?[679]\d{2}[\s.-]?\d{3}[\s.-]?\d{3}(?!\d)/g;
+export const IBAN_REGEX = () =>
+  /(?<![A-Z0-9])[A-Z]{2}\d{2}(?:[ -]?[A-Z0-9]{4}){3,7}(?:[ -]?[A-Z0-9]{1,4})?/g;
+
 export const URGENCY_LEXICON = [
   "urgente", "inmediatamente", "verificar", "verifique", "bloqueada",
   "bloqueado", "suspendida", "suspendido", "premio", "hacienda",
@@ -217,23 +225,21 @@ export function extractIndicatorsFromText(
     indicators.push({ type: "EMAIL", value: maskEmail(email), risk: "MEDIO" });
   }
 
-  // Teléfonos españoles (enmascarados)
+  // Teléfonos españoles (enmascarados). Cubre prefijo internacional pegado
+  // (+34XXXXXXXXX / 0034XXXXXXXXX) además de los formatos con separadores.
   const phoneMatches = Array.from(
     new Set(
-      clipped.match(/(?:(?:\+|00)34[\s.-]?)?\b[679]\d{2}[\s.-]?\d{3}[\s.-]?\d{3}\b/g) ?? []
+      clipped.match(PHONE_REGEX()) ?? []
     )
   );
   for (const phone of phoneMatches.slice(0, MAX_PER_TYPE)) {
     indicators.push({ type: "PHONE", value: maskPhone(phone), risk: "MEDIO" });
   }
 
-  // IBAN (enmascarados)
+  // IBAN (enmascarados). Detecta también IBAN pegado a texto; la validez
+  // real la decide isValidIban (checksum mód-97).
   const ibanMatches = Array.from(
-    new Set(
-      (clipped.match(/\b[A-Z]{2}\d{2}(?:[\s-]?[A-Z0-9]{4}){3,7}(?:[\s-]?[A-Z0-9]{1,4})?\b/g) ?? []).filter(
-        isValidIban
-      )
-    )
+    new Set((clipped.match(IBAN_REGEX()) ?? []).filter(isValidIban))
   );
   for (const iban of ibanMatches.slice(0, MAX_PER_TYPE)) {
     indicators.push({ type: "IBAN", value: maskIban(iban), risk: "ALTO" });
@@ -301,17 +307,12 @@ export function extractIndicatorsFromText(
 export function maskPiiInText(text: string): string {
   let out = text;
   // IBAN primero (sus dígitos podrían confundirse con teléfonos)
-  out = out.replace(
-    /\b[A-Z]{2}\d{2}(?:[\s-]?[A-Z0-9]{4}){3,7}(?:[\s-]?[A-Z0-9]{1,4})?\b/g,
-    (m) => (isValidIban(m) ? maskIban(m) : m)
-  );
-  out = out.replace(/\b(?:\d{8}[A-Z]|[XYZ]\d{7}[A-Z])\b/gi, (m) =>
+  out = out.replace(IBAN_REGEX(), (m) => (isValidIban(m) ? maskIban(m) : m));
+  out = out.replace(/(?<![A-Za-z0-9])(?:\d{8}[A-Z]|[XYZ]\d{7}[A-Z])(?![A-Za-z0-9])/gi, (m) =>
     isValidDniNie(m) ? maskDni(m) : m
   );
   out = out.replace(/\b[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}\b/gi, (m) => maskEmail(m));
-  out = out.replace(/(?:(?:\+|00)34[\s.-]?)?\b[679]\d{2}[\s.-]?\d{3}[\s.-]?\d{3}\b/g, (m) =>
-    maskPhone(m)
-  );
+  out = out.replace(PHONE_REGEX(), (m) => maskPhone(m));
   return out;
 }
 

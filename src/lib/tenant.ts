@@ -52,10 +52,17 @@ export async function getSessionContext(): Promise<SessionContext | null> {
   const userId = cookieStore.get(USER_COOKIE)?.value;
   if (!tenantId || !userId) return null;
 
-  const user = await prisma.user.findFirst({
-    where: { id: userId, tenantId },
-    include: { tenant: true },
-  });
+  let user;
+  try {
+    user = await prisma.user.findFirst({
+      where: { id: userId, tenantId },
+      include: { tenant: true },
+    });
+  } catch (err) {
+    // Un fallo de BD no debe propagarse como 500 opaco: se trata como sin sesión
+    console.error("[tenant] error consultando la sesión:", err);
+    return null;
+  }
   if (!user) return null;
 
   return {

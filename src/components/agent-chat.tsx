@@ -213,9 +213,17 @@ export function AgentChat({ tenantName, userName }: { tenantName: string; userNa
             </div>
           ) : null}
 
-          <Card className="flex h-[calc(100vh-16rem)] min-h-[480px] flex-col overflow-hidden">
+          <Card className="flex h-[calc(100dvh-16rem)] min-h-[360px] flex-col overflow-hidden lg:min-h-[480px]">
         {/* Hilo de mensajes */}
-        <div ref={scrollRef} className="chat-scroll flex-1 space-y-4 overflow-y-auto p-5">
+        <div
+          ref={scrollRef}
+          className="chat-scroll flex-1 space-y-4 overflow-y-auto p-5"
+          role="log"
+          aria-live="polite"
+          aria-relevant="additions"
+          aria-atomic="false"
+          aria-label="Conversación con el agente de seguridad"
+        >
           {messages.map((message, i) =>
             message.role === "agent" ? (
               <div key={i} className="flex items-start gap-2.5">
@@ -235,7 +243,7 @@ export function AgentChat({ tenantName, userName }: { tenantName: string; userNa
             )
           )}
           {busy ? (
-            <div className="flex items-center gap-2 pl-11 text-sm text-slate-400">
+            <div role="status" className="flex items-center gap-2 pl-11 text-sm text-slate-500">
               <Loader2 className="h-4 w-4 animate-spin" />
               {busy === "analyze" ? "Preparando el análisis…" : "El agente está escribiendo…"}
             </div>
@@ -291,14 +299,16 @@ export function AgentChat({ tenantName, userName }: { tenantName: string; userNa
                 onClick={() => fileInputRef.current?.click()}
                 disabled={busy !== null}
                 title="Subir archivo sospechoso para analizar"
+                aria-label="Subir archivo sospechoso para analizar"
                 className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 text-slate-500 transition-colors hover:border-brand-300 hover:bg-brand-50 hover:text-brand-600 disabled:opacity-50"
               >
-                <Paperclip className="h-5 w-5" />
+                <Paperclip className="h-5 w-5" aria-hidden="true" />
               </button>
               <input
                 ref={fileInputRef}
                 type="file"
                 className="hidden"
+                aria-label="Archivo a analizar"
                 onChange={(e) => {
                   onFileSelected(e.target.files?.[0] ?? null);
                   e.target.value = "";
@@ -320,9 +330,10 @@ export function AgentChat({ tenantName, userName }: { tenantName: string; userNa
               <button
                 onClick={() => sendChat()}
                 disabled={busy !== null || !input.trim()}
+                aria-label="Enviar mensaje"
                 className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-600 text-white transition-colors hover:bg-brand-700 disabled:opacity-40"
               >
-                <SendHorizonal className="h-4.5 w-4.5" />
+                <SendHorizonal className="h-4.5 w-4.5" aria-hidden="true" />
               </button>
             </div>
           ) : null}
@@ -373,8 +384,8 @@ export function AgentChat({ tenantName, userName }: { tenantName: string; userNa
         <DemoFilesColumn files={DEMO_FILES_RIGHT} onPick={handleDemoFile} disabled={busy !== null} />
       </div>
 
-      <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-xs text-slate-400">
-        <Bot className="h-3.5 w-3.5" />
+      <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-xs text-slate-600">
+        <Bot className="h-3.5 w-3.5" aria-hidden="true" />
         El agente nunca recibe el contenido de tus archivos: solo metadatos, puntuaciones y señales.
         Los archivos de ejemplo son inofensivos y contienen datos ficticios.
       </p>

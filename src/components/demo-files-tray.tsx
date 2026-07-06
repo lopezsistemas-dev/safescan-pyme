@@ -93,9 +93,10 @@ function DemoFileChip({
         onClick={() => onPick(name)}
         disabled={disabled}
         title={label}
+        aria-label={`Analizar archivo de ejemplo: ${name} — ${label}`}
         className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-600 shadow-sm transition-colors hover:border-brand-300 hover:text-brand-700 disabled:opacity-50"
       >
-        <Icon className={`h-3.5 w-3.5 ${tone}`} />
+        <Icon className={`h-3.5 w-3.5 ${tone}`} aria-hidden="true" />
         <span className="font-mono">{name}</span>
       </button>
     );
@@ -111,10 +112,11 @@ function DemoFileChip({
       onClick={() => onPick(name)}
       disabled={disabled}
       title={`${label} — arrástralo al chat o haz clic para analizarlo`}
+      aria-label={`Analizar archivo de ejemplo: ${name} — ${label}`}
       className="group flex w-full cursor-grab flex-col items-center gap-1 rounded-2xl border border-slate-200 bg-white p-3 text-center shadow-sm transition-all select-none hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-md active:cursor-grabbing disabled:opacity-50"
     >
       <span className="relative">
-        <Icon className={`h-9 w-9 ${tone}`} strokeWidth={1.6} />
+        <Icon className={`h-9 w-9 ${tone}`} strokeWidth={1.6} aria-hidden="true" />
         <span className={`absolute -top-0.5 -right-1 h-2.5 w-2.5 rounded-full ${dot} ring-2 ring-white`} />
       </span>
       <span className="w-full truncate font-mono text-[11px] font-medium text-slate-700">{name}</span>

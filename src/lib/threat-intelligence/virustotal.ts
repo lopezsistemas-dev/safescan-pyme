@@ -54,6 +54,8 @@ export class VirusTotalProvider implements ThreatIntelligenceProvider {
       headers: { "x-apikey": this.apiKey, accept: "application/json" },
       // Los análisis no deben quedar cacheados entre peticiones
       cache: "no-store",
+      // Un upstream colgado se convierte en excepción → el pipeline degrada a mock
+      signal: AbortSignal.timeout(20_000),
     });
     if (res.status === 404) return null;
     if (!res.ok) throw new Error(`VirusTotal respondió ${res.status} para ${path}`);

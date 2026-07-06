@@ -4,6 +4,7 @@ import { env } from "@/lib/env";
 import { audit } from "@/lib/audit";
 import { jsonError, rejectOversizedBody, requireSession } from "@/lib/api-helpers";
 import { getExtension } from "@/lib/containment/filetype";
+import { maskPiiInText } from "@/lib/containment/indicators";
 import { saveToQuarantine } from "@/lib/containment/quarantine";
 
 /**
@@ -32,8 +33,8 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const originalName = (file.name || "archivo").slice(0, 255);
-  const ext = getExtension(originalName);
+  const rawName = (file.name || "archivo").slice(0, 255);
+  const ext = getExtension(rawName);
   if (!ext || !env.allowedExtensions.includes(ext)) {
     return jsonError(
       415,
@@ -41,6 +42,12 @@ export async function POST(req: NextRequest) {
         "Si necesitas analizarla, el responsable puede ampliarla en la configuración (ALLOWED_FILE_TYPES)."
     );
   }
+
+  // Privacidad por diseño: el nombre del archivo también puede contener PII
+  // (DNI, IBAN, teléfono en el propio nombre). Se enmascara antes de persistir;
+  // maskPiiInText conserva la extensión, así que la detección posterior de tipo
+  // real y doble extensión sigue funcionando.
+  const originalName = maskPiiInText(rawName);
 
   const buffer = Buffer.from(await file.arrayBuffer());
   const saved = await saveToQuarantine(ctx.tenant.id, buffer);
