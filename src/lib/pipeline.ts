@@ -286,8 +286,17 @@ export async function runAnalysisPipeline(analysisId: string): Promise<void> {
       mockMode: env.threatIntelIsMock,
     };
 
+    // Defensa en profundidad: si la generación de informes falla, no se
+    // descarta el veredicto ya calculado; se usan los informes del mock.
     const agent = getAgentProvider();
-    const reports = await agent.generateReports(reportInput);
+    let reports;
+    try {
+      reports = await agent.generateReports(reportInput);
+    } catch (err) {
+      console.error("[pipeline] generación de informes falló, usando mock:", err);
+      const { MockAgentProvider } = await import("@/lib/ai-agent/mock");
+      reports = await new MockAgentProvider().generateReports(reportInput);
+    }
 
     await prisma.analysis.update({
       where: { id: analysisId },

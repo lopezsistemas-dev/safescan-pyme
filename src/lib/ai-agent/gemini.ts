@@ -72,6 +72,8 @@ export class GeminiProvider implements AgentProvider {
           },
         }),
         cache: "no-store",
+        // Un upstream colgado se convierte en excepción → degrada a mock
+        signal: AbortSignal.timeout(20_000),
       }
     );
     if (!res.ok) throw new Error(`Gemini respondió ${res.status}`);

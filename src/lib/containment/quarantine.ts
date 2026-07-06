@@ -20,7 +20,6 @@ export function sha256Of(buffer: Buffer): string {
 export interface QuarantinedFile {
   /** Ruta relativa al proyecto (se persiste en BD). */
   relPath: string;
-  absPath: string;
   sha256: string;
   size: number;
 }
@@ -33,7 +32,6 @@ export async function saveToQuarantine(tenantId: string, buffer: Buffer): Promis
   await fs.writeFile(absPath, buffer, { mode: 0o600 });
   return {
     relPath: path.relative(process.cwd(), absPath),
-    absPath,
     sha256: sha256Of(buffer),
     size: buffer.length,
   };

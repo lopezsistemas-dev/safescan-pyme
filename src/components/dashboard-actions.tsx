@@ -17,14 +17,16 @@ export function AnalysisActions({
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   async function call(action: string, url: string, init: RequestInit) {
     setBusy(action);
+    setError(null);
     try {
       const res = await fetch(url, init);
       if (!res.ok) {
         const data = (await res.json().catch(() => null)) as { error?: string } | null;
-        alert(data?.error ?? "La acción no se pudo completar.");
+        setError(data?.error ?? "La acción no se pudo completar.");
       }
       router.refresh();
     } finally {
@@ -74,6 +76,11 @@ export function AnalysisActions({
           Eliminar
         </button>
       ) : null}
+      {error ? (
+        <span role="alert" className="w-full text-xs text-red-600">
+          {error}
+        </span>
+      ) : null}
     </div>
   );
 }
@@ -94,9 +101,11 @@ export function SweepButton() {
         | null;
       const total = (data?.quarantine ?? 0) + (data?.safedocs ?? 0) + (data?.inputs ?? 0);
       setMessage(
-        total > 0
-          ? `${total} archivo(s) expirados eliminados.`
-          : "No hay archivos expirados pendientes."
+        total === 0
+          ? "No hay elementos expirados pendientes."
+          : total === 1
+            ? "1 elemento expirado eliminado."
+            : `${total} elementos expirados eliminados.`
       );
       router.refresh();
     } finally {

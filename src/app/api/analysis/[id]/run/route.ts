@@ -15,10 +15,31 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
   const { id } = await params;
   const analysis = await prisma.analysis.findFirst({
     where: { id, tenantId: ctx.tenant.id },
-    select: { id: true, status: true },
+    select: { id: true, status: true, updatedAt: true },
   });
   if (!analysis) return jsonError(404, "Análisis no encontrado.");
-  if (analysis.status === "ANALIZANDO") {
+
+  // Un análisis en curso reciente no se relanza; pero si lleva colgado en
+  // ANALIZANDO más de 2 minutos (proceso muerto, timeout de plataforma…) se
+  // considera zombi y se permite reclamarlo, para no bloquearlo para siempre.
+  const STALE_MS = 2 * 60_000;
+  const isStale = Date.now() - new Date(analysis.updatedAt).getTime() > STALE_MS;
+  if (analysis.status === "ANALIZANDO" && !isStale) {
+    return jsonError(409, "El análisis ya está en curso.");
+  }
+
+  // Lock atómico: solo un ejecutor puede pasar de RECIBIDO/ERROR/zombi a ANALIZANDO
+  const claim = await prisma.analysis.updateMany({
+    where: {
+      id,
+      tenantId: ctx.tenant.id,
+      ...(isStale
+        ? {}
+        : { status: { in: ["RECIBIDO", "ERROR"] } }),
+    },
+    data: { status: "ANALIZANDO", progressStage: "Recibido en cuarentena", progressPct: 5 },
+  });
+  if (claim.count === 0) {
     return jsonError(409, "El análisis ya está en curso.");
   }
 

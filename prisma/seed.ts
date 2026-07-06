@@ -331,7 +331,7 @@ async function main() {
       userId: pablo.id,
       inputType: "URL",
       originalName: null,
-      inputValue: "http://pagos-factura-urgente.top/verificar?id=8123",
+      inputValue: "http://pagos-verificacion-urgente.top/verificar?id=8123",
       status: "COMPLETADO",
       progressStage: "Análisis completado",
       progressPct: 100,
@@ -358,7 +358,7 @@ async function main() {
       adminReport: [
         "## Informe técnico — URL sospechosa",
         "",
-        "- **URL:** hxxp://pagos-factura-urgente[.]top/verificar?id=8123 (desactivada)",
+        "- **URL:** hxxp://pagos-verificacion-urgente[.]top/verificar?id=8123 (desactivada)",
         "- **Señales:** TLD .top de bajo coste, dominio de reciente creación, léxico de presión (“urgente”), HTTP sin cifrar, patrón de verificación de pago.",
         "- **Threat Score:** 88/100 · **Sensitivity Score:** 5/100",
         "- **Flujo aplicado:** URL_LOOKUP — solo se consultó la reputación de la URL; ningún contenido de la empresa salió del entorno.",
@@ -383,8 +383,8 @@ async function main() {
 
   await prisma.indicator.createMany({
     data: [
-      { analysisId: caso4.id, type: "URL", value: "http://pagos-factura-urgente.top/verificar?id=8123", risk: "ALTO" },
-      { analysisId: caso4.id, type: "DOMAIN", value: "pagos-factura-urgente.top", risk: "ALTO" },
+      { analysisId: caso4.id, type: "URL", value: "http://pagos-verificacion-urgente.top/verificar?id=8123", risk: "ALTO" },
+      { analysisId: caso4.id, type: "DOMAIN", value: "pagos-verificacion-urgente.top", risk: "ALTO" },
       { analysisId: caso4.id, type: "KEYWORD", value: "Léxico de presión: “urgente”, “verificar”", risk: "MEDIO" },
     ],
   });

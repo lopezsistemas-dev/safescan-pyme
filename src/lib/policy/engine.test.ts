@@ -240,6 +240,26 @@ describe("Utilidades de contención", () => {
     expect(masked).toContain("ES0021000418450200051332"); // inválido: intacto
     expect(masked).not.toContain("ES9121000418450200051332"); // válido: enmascarado
   });
+
+  it("enmascara teléfono con prefijo internacional pegado (+34 / 0034 sin separadores)", () => {
+    expect(maskPiiInText("llama al +34612345678 hoy")).not.toContain("612345678");
+    expect(maskPiiInText("tel 0034612345678")).not.toContain("612345678");
+    expect(maskPiiInText("+34 612 345 678")).not.toContain("612 345 678");
+    // no debe partir un número más largo (13 dígitos) como si fuera teléfono ES
+    expect(maskPiiInText("id 6123456789012")).toContain("6123456789012");
+  });
+
+  it("enmascara IBAN pegado a texto sin espacio previo", () => {
+    const masked = maskPiiInText("cuentaES9121000418450200051332fin");
+    expect(masked).not.toContain("ES9121000418450200051332");
+  });
+
+  it("enmascara la PII embebida en el nombre de archivo", () => {
+    const masked = maskPiiInText("nomina_12345678Z_ES9121000418450200051332.pdf");
+    expect(masked).not.toContain("12345678Z");
+    expect(masked).not.toContain("ES9121000418450200051332");
+    expect(masked).toContain(".pdf"); // la extensión se conserva
+  });
 });
 
 describe("SafeDocs · parsePageRanges", () => {

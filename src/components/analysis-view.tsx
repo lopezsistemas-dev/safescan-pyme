@@ -83,6 +83,7 @@ function parseJson<T>(raw: string | null): T | null {
 export function AnalysisView({ id, agentIsMock }: { id: string; agentIsMock: boolean }) {
   const [analysis, setAnalysis] = useState<AnalysisDto | null>(null);
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const [retryTick, setRetryTick] = useState(0);
   const startedRef = useRef(false);
 
   // Lanzar el pipeline una sola vez (idempotente en el servidor)
@@ -122,7 +123,7 @@ export function AnalysisView({ id, agentIsMock }: { id: string; agentIsMock: boo
       cancelled = true;
       if (timer) clearTimeout(timer);
     };
-  }, [id]);
+  }, [id, retryTick]);
 
   if (!analysis) {
     return (
@@ -139,6 +140,7 @@ export function AnalysisView({ id, agentIsMock }: { id: string; agentIsMock: boo
 
   return (
     <div className="mx-auto max-w-5xl">
+      <h1 className="sr-only">Análisis de {subject}</h1>
       <div className="mb-4 flex items-center justify-between gap-2">
         <Link
           href="/agente"
@@ -219,7 +221,14 @@ export function AnalysisView({ id, agentIsMock }: { id: string; agentIsMock: boo
                 Analizando en el entorno seguro…
               </h2>
               <p className="mt-1 text-sm text-slate-500">{analysis.progressStage}</p>
-              <div className="mt-5 h-2.5 w-full max-w-sm overflow-hidden rounded-full bg-slate-100">
+              <div
+                className="mt-5 h-2.5 w-full max-w-sm overflow-hidden rounded-full bg-slate-100"
+                role="progressbar"
+                aria-valuenow={analysis.progressPct}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-label={`Progreso del análisis: ${analysis.progressStage}`}
+              >
                 <div
                   className="h-full rounded-full bg-brand-500 transition-all duration-500"
                   style={{ width: `${analysis.progressPct}%` }}
@@ -243,9 +252,14 @@ export function AnalysisView({ id, agentIsMock }: { id: string; agentIsMock: boo
                 Puedes reintentar el análisis o avisar al responsable.
               </p>
               <button
-                onClick={() => {
-                  startedRef.current = false;
-                  void fetch(`/api/analysis/${id}/run`, { method: "POST" });
+                onClick={async () => {
+                  setFetchError(null);
+                  // Optimista: volver a estado en curso y reactivar el polling
+                  setAnalysis((prev) =>
+                    prev ? { ...prev, status: "ANALIZANDO", progressPct: 5 } : prev
+                  );
+                  await fetch(`/api/analysis/${id}/run`, { method: "POST" }).catch(() => {});
+                  setRetryTick((n) => n + 1);
                 }}
                 className="mt-4 rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
               >
