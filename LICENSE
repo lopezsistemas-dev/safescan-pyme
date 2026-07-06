@@ -1,21 +1,39 @@
-MIT License
+SafeScan PYME — Aviso de derechos de autor y condiciones de uso
+Copyright (c) 2026 Daniel Manzano López. Todos los derechos reservados.
 
-Copyright (c) 2026 Daniel Manzano López
+Este repositorio se publica de forma pública ÚNICAMENTE con fines de evaluación
+de la candidatura a los «Premios de la Cátedra de Ciberseguridad a la Innovación
+en Ciberseguridad e IA» (Universidad de Málaga, VirusTotal SLU y Google) y de
+demostración del proyecto. Su publicación NO constituye una licencia de código
+abierto ni una cesión de derechos.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+TITULARIDAD
+La titularidad de los derechos de propiedad intelectual e industrial sobre este
+proyecto corresponde a su autor. Conforme a la resolución oficial de la
+convocatoria: «La titularidad de los derechos de propiedad intelectual e
+industrial sobre los proyectos corresponderá a sus autores, sin perjuicio de los
+acuerdos específicos que pudieran suscribirse posteriormente entre las partes. La
+concesión del premio, la mentoría y el acceso a recursos no implicarán cesión
+automática de derechos a favor de la Universidad de Málaga, VirusTotal SLU, Google
+o cualquier otra entidad colaboradora.»
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+RESERVA DE DERECHOS
+Queda reservado todo derecho no concedido expresamente. Sin autorización previa y
+por escrito del autor, NINGUNA persona ni entidad —incluidas la Universidad de
+Málaga, VirusTotal SLU, Google, cualquier entidad colaboradora o cualquier
+tercero— queda autorizada a:
+  - usar, ejecutar o explotar el software con fines comerciales o productivos;
+  - copiar, reproducir, modificar, adaptar o crear obras derivadas;
+  - redistribuir, sublicenciar, publicar o vender el código o partes de él;
+  - apropiarse de la idea, el diseño, el nombre o la marca «SafeScan PYME».
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+USO PERMITIDO
+Se permite exclusivamente el acceso, la lectura y la revisión del código con
+fines de evaluación de la candidatura y de referencia académica, citando siempre
+la autoría. Para cualquier otro uso, contáctese con el autor para acordar los
+términos.
+
+EXENCIÓN DE GARANTÍA
+EL SOFTWARE SE PROPORCIONA «TAL CUAL», SIN GARANTÍA DE NINGÚN TIPO, EXPRESA O
+IMPLÍCITA. EL AUTOR NO SERÁ RESPONSABLE DE NINGUNA RECLAMACIÓN, DAÑO U OTRA
+RESPONSABILIDAD DERIVADA DEL USO DEL SOFTWARE.
