@@ -36,6 +36,12 @@ export default async function SelectTenantPage() {
           (seguridad.asesorialopez.es, scan.hotelmalaga.com…). En esta demo, selecciona empresa y
           usuario para entrar en su portal.
         </p>
+        <p className="mx-auto mt-4 max-w-xl rounded-xl border border-brand-100 bg-brand-50 px-4 py-2.5 text-sm text-brand-700">
+          <strong className="font-semibold">Recorrido sugerido:</strong> entra como{" "}
+          <strong className="font-semibold">Empleado</strong>, analiza un archivo de ejemplo en el
+          agente y vuelve como <strong className="font-semibold">Responsable</strong> para ver el
+          panel de seguridad.
+        </p>
       </div>
 
       <TenantSelector

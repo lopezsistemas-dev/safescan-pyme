@@ -43,3 +43,19 @@ body {
   background: #cbd5e1;
   border-radius: 8px;
 }
+
+/* Impresión: al exportar un informe a PDF (Imprimir → Guardar como PDF) se
+   ocultan los cromos de navegación y se fuerza fondo blanco para obtener un
+   documento limpio y archivable por el responsable de la pyme. */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #ffffff !important;
+  }
+  /* Evita cortes de página feos dentro de una tarjeta del informe */
+  .print-avoid-break {
+    break-inside: avoid;
+  }
+}

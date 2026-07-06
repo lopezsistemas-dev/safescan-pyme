@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { env } from "@/lib/env";
 import { audit } from "@/lib/audit";
 import { jsonError, requireSession } from "@/lib/api-helpers";
+import { guardAnalysisUrl } from "@/lib/containment/url-guard";
 
 const bodySchema = z.object({
   url: z
@@ -23,14 +24,13 @@ export async function POST(req: NextRequest) {
     return jsonError(400, parsed.error.issues[0]?.message ?? "URL no válida.");
   }
 
-  // Normalizar: aceptar URLs pegadas sin protocolo
-  let url = parsed.data.url;
-  if (!/^https?:\/\//i.test(url)) url = `http://${url}`;
-  try {
-    new URL(url);
-  } catch {
-    return jsonError(400, "El texto pegado no parece una URL válida.");
+  // Validar y normalizar: acepta URLs sin protocolo, rechaza esquemas no
+  // http/https, credenciales embebidas y hosts sin dominio válido.
+  const guard = guardAnalysisUrl(parsed.data.url);
+  if (!guard.ok) {
+    return jsonError(400, guard.message);
   }
+  const url = guard.url;
 
   const analysis = await prisma.analysis.create({
     data: {

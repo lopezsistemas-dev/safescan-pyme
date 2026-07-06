@@ -19,6 +19,9 @@ export function TenantSelector({ tenants }: { tenants: TenantOption[] }) {
   const [loadingUser, setLoadingUser] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // Punto de entrada sugerido: el primer empleado de la primera empresa.
+  const startHereUserId = tenants[0]?.users.find((u) => u.role !== "RESPONSABLE")?.id ?? null;
+
   async function select(tenantId: string, userId: string) {
     setLoadingUser(userId);
     setError(null);
@@ -77,6 +80,10 @@ export function TenantSelector({ tenants }: { tenants: TenantOption[] }) {
                   </span>
                   {loadingUser === user.id ? (
                     <Loader2 className="h-4 w-4 animate-spin text-brand-600" />
+                  ) : user.id === startHereUserId ? (
+                    <span className="rounded-full bg-brand-600 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
+                      Empieza aquí
+                    </span>
                   ) : null}
                 </button>
               ))}

@@ -15,7 +15,7 @@ export default async function PortalLayout({ children }: { children: React.React
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur">
+      <header className="no-print sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur">
         <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-3 px-4">
           <div className="flex items-center gap-3">
             <Link href="/agente" className="flex items-center gap-2" aria-label="SafeScan PYME — ir al agente">
@@ -52,7 +52,7 @@ export default async function PortalLayout({ children }: { children: React.React
 
       <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 py-6">{children}</main>
 
-      <footer className="border-t border-slate-200 bg-white">
+      <footer className="no-print border-t border-slate-200 bg-white">
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-1 px-4 py-3 text-xs text-slate-400 sm:flex-row">
           <span>
             Portal privado de <strong className="text-slate-500">{ctx.tenant.name}</strong> · {ctx.tenant.sector}
