@@ -1,0 +1,54 @@
+name: CI
+
+# Verifica que SafeScan PYME compila, pasa el linter, los tests y el build
+# sin necesidad de claves de API ni base de datos externa: todo el pipeline
+# funciona en modo mock determinista (MOCK_SECURITY_ANALYSIS=true).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancela ejecuciones antiguas de la misma rama/PR si llega una nueva.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Tipos · Lint · Tests · Build
+    runs-on: ubuntu-latest
+    env:
+      # SQLite local: prisma generate necesita un DATABASE_URL con el formato
+      # del provider del schema. Todas las páginas que consultan la BD son
+      # force-dynamic, así que `next build` no se conecta en tiempo de build.
+      DATABASE_URL: "file:./prisma/ci.db"
+      MOCK_SECURITY_ANALYSIS: "true"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Generar cliente Prisma
+        run: npx prisma generate
+
+      - name: Comprobación de tipos (tsc)
+        run: npx tsc --noEmit
+
+      - name: Linter (eslint)
+        run: npm run lint
+
+      - name: Tests (vitest)
+        run: npm test
+
+      - name: Build de producción (next build)
+        run: npm run build

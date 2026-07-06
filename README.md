@@ -1,5 +1,10 @@
 # SafeScan PYME
 
+[![CI](https://github.com/lopezsistemas-dev/safescan-pyme/actions/workflows/ci.yml/badge.svg)](https://github.com/lopezsistemas-dev/safescan-pyme/actions/workflows/ci.yml)
+&nbsp;![Licencia MIT](https://img.shields.io/badge/licencia-MIT-blue)
+&nbsp;![Next.js 15](https://img.shields.io/badge/Next.js-15-black)
+&nbsp;![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6)
+
 **Agente privado de ciberseguridad para pymes y autónomos, impulsado por Gemini y VirusTotal/Google Threat Intelligence.**
 
 > Pregunta antes de abrir.

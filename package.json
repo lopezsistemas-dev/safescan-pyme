@@ -3,6 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "description": "SafeScan PYME — Agente privado de ciberseguridad para pymes y autónomos, impulsado por Gemini y VirusTotal/Google Threat Intelligence",
+  "license": "MIT",
+  "author": "Daniel Manzano López",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lopezsistemas-dev/safescan-pyme.git"
+  },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
