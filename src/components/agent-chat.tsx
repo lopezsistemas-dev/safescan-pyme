@@ -176,7 +176,7 @@ export function AgentChat({ tenantName, userName }: { tenantName: string; userNa
   }
 
   return (
-    <div className="mx-auto max-w-6xl">
+    <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col justify-center py-2">
       <div className="mb-4 text-center">
         <h1 className="text-2xl font-bold text-slate-900">
           ¿Qué has recibido?
@@ -213,7 +213,7 @@ export function AgentChat({ tenantName, userName }: { tenantName: string; userNa
             </div>
           ) : null}
 
-          <Card className="flex h-[calc(100dvh-16rem)] min-h-[360px] flex-col overflow-hidden lg:min-h-[480px]">
+          <Card className="flex h-[64vh] max-h-[720px] min-h-[440px] flex-col overflow-hidden">
         {/* Hilo de mensajes */}
         <div
           ref={scrollRef}
