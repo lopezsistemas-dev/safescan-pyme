@@ -1,7 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "prisma generate && prisma migrate deploy && next build",
-  "regions": [
-    "fra1"
-  ]
+  "regions": ["fra1"],
+  "git": {
+    "deploymentEnabled": {
+      "main": false
+    }
+  }
 }
