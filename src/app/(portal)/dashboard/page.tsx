@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Archive, Ban, FileSearch, ScrollText, TriangleAlert } from "lucide-react";
 import { prisma } from "@/lib/db";
@@ -158,7 +159,14 @@ export default async function DashboardPage() {
               {analyses.length === 0 ? (
                 <tr>
                   <td colSpan={9} className="px-5 py-8 text-center text-sm text-slate-400">
-                    Aún no hay análisis. Prueba el agente subiendo un archivo de demo-files/.
+                    Aún no hay análisis.{" "}
+                    <Link
+                      href="/agente"
+                      className="font-medium text-brand-600 underline-offset-2 hover:underline"
+                    >
+                      Ir al agente y analizar tu primer archivo
+                    </Link>
+                    .
                   </td>
                 </tr>
               ) : null}

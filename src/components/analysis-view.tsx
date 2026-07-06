@@ -21,6 +21,7 @@ import {
 } from "@/lib/constants";
 import { Card, ReportMarkdown, RiskBadge, ScoreBar, formatBytes } from "./ui";
 import { AnalysisBadges, AnalysisTimeline, VerdictBanner } from "./analysis-ui";
+import { PrivacyReceipt } from "./privacy-receipt";
 
 interface IndicatorDto {
   id: string;
@@ -339,6 +340,13 @@ export function AnalysisView({ id, agentIsMock }: { id: string; agentIsMock: boo
                   </p>
                 ) : null}
               </Card>
+
+              {/* Recibo de privacidad: qué salió y qué nunca salió del entorno */}
+              <PrivacyReceipt
+                inputType={analysis.inputType}
+                flow={(analysis.recommendedFlow as RecommendedFlow | null) ?? null}
+                mockMode={analysis.mockMode}
+              />
 
               {/* Indicadores */}
               {analysis.indicators.length > 0 ? (

@@ -14,6 +14,7 @@ import {
 import { maskPiiInText } from "@/lib/containment/indicators";
 import { Card, ReportMarkdown, RiskBadge, ScoreBar, formatBytes, formatDate } from "@/components/ui";
 import { AnalysisBadges, VerdictBanner } from "@/components/analysis-ui";
+import { PrintButton } from "@/components/print-button";
 
 export const dynamic = "force-dynamic";
 
@@ -42,12 +43,15 @@ export default async function ReportDetailPage({ params }: { params: Promise<{ i
 
   return (
     <div className="mx-auto max-w-4xl">
-      <Link
-        href="/dashboard"
-        className="mb-4 inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700"
-      >
-        <ArrowLeft className="h-4 w-4" /> Volver al dashboard
-      </Link>
+      <div className="no-print mb-4 flex items-center justify-between gap-3">
+        <Link
+          href="/dashboard"
+          className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700"
+        >
+          <ArrowLeft className="h-4 w-4" /> Volver al dashboard
+        </Link>
+        <PrintButton />
+      </div>
 
       <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div>
