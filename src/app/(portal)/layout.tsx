@@ -50,7 +50,7 @@ export default async function PortalLayout({ children }: { children: React.React
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">{children}</main>
+      <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 py-6">{children}</main>
 
       <footer className="border-t border-slate-200 bg-white">
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-1 px-4 py-3 text-xs text-slate-400 sm:flex-row">
