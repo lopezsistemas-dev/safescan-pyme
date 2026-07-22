@@ -1,0 +1,39 @@
+name: Demo keep-alive
+
+# La demo usa un proyecto Supabase en plan free, que se PAUSA tras ~7 días sin
+# actividad de base de datos (y entonces la demo devuelve 500). Este workflow
+# hace una visita diaria a una página que consulta la BD: mantiene el proyecto
+# activo y, de paso, avisa por correo si la demo dejara de responder.
+
+on:
+  schedule:
+    # Todos los días a las 06:00 UTC
+    - cron: "0 6 * * *"
+  workflow_dispatch: # permite lanzarlo a mano desde la pestaña Actions
+
+jobs:
+  ping:
+    name: Visitar la demo (mantiene viva la BD)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Comprobar que la demo responde y consulta la base de datos
+        run: |
+          URL="https://safescan-pyme.vercel.app/seleccionar-empresa"
+          echo "Visitando $URL"
+          # -sS: silencioso pero muestra errores | --max-time: no colgarse
+          body=$(curl -sS --max-time 30 -w "\n%{http_code}" "$URL")
+          code=$(echo "$body" | tail -n1)
+          echo "HTTP $code"
+
+          if [ "$code" != "200" ]; then
+            echo "::error::La demo respondió $code (se esperaba 200). ¿Proyecto Supabase pausado?"
+            exit 1
+          fi
+
+          # Un 200 no basta: comprobar que realmente se leyeron datos de la BD
+          if ! echo "$body" | grep -q "Asesoría López"; then
+            echo "::error::La página responde 200 pero no muestra las empresas: la consulta a la BD ha fallado."
+            exit 1
+          fi
+
+          echo "✅ Demo operativa y base de datos respondiendo."
