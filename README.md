@@ -1,7 +1,7 @@
 # SafeScan PYME
 
 [![CI](https://github.com/lopezsistemas-dev/safescan-pyme/actions/workflows/ci.yml/badge.svg)](https://github.com/lopezsistemas-dev/safescan-pyme/actions/workflows/ci.yml)
-&nbsp;[![Derechos reservados](https://img.shields.io/badge/derechos-reservados-critical)](LICENSE)
+&nbsp;[![Licencia AGPL v3](https://img.shields.io/badge/licencia-AGPL--3.0-blue)](LICENSE)
 &nbsp;![Next.js 15](https://img.shields.io/badge/Next.js-15-black)
 &nbsp;![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6)
 
@@ -221,3 +221,14 @@ Decisiones implementadas:
 ## Nota académica
 
 MVP desarrollado para los Premios de la Cátedra de Ciberseguridad a la Innovación en Ciberseguridad e Inteligencia Artificial (Universidad de Málaga, en colaboración con VirusTotal SLU/Google). Los tres clientes, sus usuarios y todos los datos de `demo-files/` son ficticios. VirusTotal, Google y Gemini son marcas de sus respectivos titulares; su uso aquí es descriptivo, en el marco de la convocatoria.
+
+## Licencia
+
+**SafeScan PYME es software libre, con licencia dual.**
+
+- **AGPL-3.0** (por defecto, ver [`LICENSE`](LICENSE)): cualquier pyme, autónomo, gestoría, hotel, clínica o administración puede **usarlo, modificarlo y autoalojarlo gratis**. Ese es el objetivo del proyecto: que una empresa pequeña no tenga que elegir entre protegerse y proteger sus datos. A cambio, la AGPL exige reciprocidad — quien distribuya una versión modificada, o la ofrezca como servicio en red, debe publicar su código fuente. Así nadie puede convertirlo en un producto cerrado.
+- **Licencia comercial**: para integrarlo en producto propietario, ofrecerlo como SaaS sin publicar el código derivado, o contratar soporte y garantías. Detalles y contacto en [`COMMERCIAL-LICENSE.md`](COMMERCIAL-LICENSE.md) → **info@lopezsistemas.es**
+
+Copyright © 2026 Daniel Manzano López. La titularidad de los derechos de propiedad intelectual e industrial corresponde a su autor; conforme a la resolución de la convocatoria de la Cátedra, el premio, la mentoría y el acceso a recursos **no implican cesión de derechos** a la Universidad de Málaga, VirusTotal SLU, Google ni a ninguna otra entidad colaboradora. Publicar el proyecto bajo AGPL-3.0 es un ejercicio de esos derechos por parte del autor.
+
+Las contribuciones son bienvenidas y se aceptan bajo AGPL-3.0.
