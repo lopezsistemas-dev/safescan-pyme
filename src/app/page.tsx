@@ -224,6 +224,27 @@ export default function LandingPage() {
           <Bot className="h-3.5 w-3.5" />
           SafeScan PYME · MVP académico · Premios de la Cátedra de Ciberseguridad UMA — VirusTotal/Google
         </p>
+        {/* AGPL-3.0 art. 13: ofrecer el código fuente a quien usa el servicio en red */}
+        <p className="mt-1.5">
+          Software libre bajo{" "}
+          <a
+            href="https://github.com/lopezsistemas-dev/safescan-pyme/blob/main/LICENSE"
+            className="underline underline-offset-2 hover:text-slate-600"
+            target="_blank"
+            rel="noreferrer"
+          >
+            AGPL-3.0
+          </a>
+          {" · "}
+          <a
+            href="https://github.com/lopezsistemas-dev/safescan-pyme"
+            className="underline underline-offset-2 hover:text-slate-600"
+            target="_blank"
+            rel="noreferrer"
+          >
+            código fuente
+          </a>
+        </p>
       </footer>
     </div>
   );

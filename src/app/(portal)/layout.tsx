@@ -57,7 +57,18 @@ export default async function PortalLayout({ children }: { children: React.React
           <span>
             Portal privado de <strong className="text-slate-500">{ctx.tenant.name}</strong> · {ctx.tenant.sector}
           </span>
-          <span>La privacidad durante el análisis también es ciberseguridad.</span>
+          <span className="flex items-center gap-1.5">
+            La privacidad durante el análisis también es ciberseguridad.
+            {/* AGPL-3.0 art. 13: código fuente accesible para quien usa el servicio */}
+            <a
+              href="https://github.com/lopezsistemas-dev/safescan-pyme"
+              className="underline underline-offset-2 hover:text-slate-600"
+              target="_blank"
+              rel="noreferrer"
+            >
+              AGPL-3.0
+            </a>
+          </span>
         </div>
       </footer>
     </div>
