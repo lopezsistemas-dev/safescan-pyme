@@ -221,11 +221,3 @@ Decisiones implementadas:
 ## Nota académica
 
 MVP desarrollado para los Premios de la Cátedra de Ciberseguridad a la Innovación en Ciberseguridad e Inteligencia Artificial (Universidad de Málaga, en colaboración con VirusTotal SLU/Google). Los tres clientes, sus usuarios y todos los datos de `demo-files/` son ficticios. VirusTotal, Google y Gemini son marcas de sus respectivos titulares; su uso aquí es descriptivo, en el marco de la convocatoria.
-
-## Propiedad intelectual
-
-**Copyright © 2026 Daniel Manzano López. Todos los derechos reservados.**
-
-Este repositorio es público **únicamente** para la evaluación de la candidatura y la demostración del proyecto: **no es código abierto**. La titularidad de los derechos de propiedad intelectual e industrial corresponde a su autor. Conforme a la resolución oficial de la convocatoria, la concesión del premio, la mentoría y el acceso a recursos **no implican cesión automática de derechos** a favor de la Universidad de Málaga, VirusTotal SLU, Google ni de ninguna otra entidad colaboradora.
-
-Sin autorización previa y por escrito del autor no se permite usar, copiar, modificar, redistribuir ni explotar comercialmente el código o la idea. Se permite leer y revisar el proyecto con fines de evaluación y referencia académica, citando la autoría. Ver [`LICENSE`](LICENSE) para las condiciones completas.
